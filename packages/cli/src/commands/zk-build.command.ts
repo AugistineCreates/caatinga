@@ -12,6 +12,7 @@ export function registerZkBuildCommand(program: Command): void {
     .command("build [circuitName]")
     .description("Compile a Circom circuit and run the trusted setup")
     .option("--embed-vk", "Emit a static vk.rs artifact for the verifier contract (experimental)")
+    .option("--network <network>", "Target network for the build")
     .option(
       "--allow-dev-ceremony",
       "Allow single-party dev ceremony when defaultNetwork is mainnet (not for production)"
@@ -19,7 +20,7 @@ export function registerZkBuildCommand(program: Command): void {
     .action(
       async (
         circuitName: string | undefined,
-        options: { embedVk?: boolean; allowDevCeremony?: boolean }
+        options: { embedVk?: boolean; allowDevCeremony?: boolean; network?: string }
       ) => {
         await runCliAction(async () => {
           const config = await loadConfig();
@@ -28,8 +29,10 @@ export function registerZkBuildCommand(program: Command): void {
             throw new Error("No ZK circuits configured in caatinga.config.ts");
           }
 
+          const targetNetwork = options.network ?? config.defaultNetwork;
+
           await assertZkBuildNetworkAllowed({
-            networkName: config.defaultNetwork,
+            networkName: targetNetwork,
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 
@@ -56,7 +59,7 @@ export function registerZkBuildCommand(program: Command): void {
           });
           logger.success(`Built circuit "${name}"`);
           logger.warn(
-            `Single-party development trusted setup (defaultNetwork: ${config.defaultNetwork}). Do not use on mainnet for production.`
+            `Single-party development trusted setup (target network: ${targetNetwork}). Do not use on mainnet for production.`
           );
         });
       }
