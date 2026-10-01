@@ -32,7 +32,8 @@ export function registerZkBuildCommand(program: Command): void {
           const targetNetwork = options.network ?? config.defaultNetwork;
 
           await assertZkBuildNetworkAllowed({
-            networkName: targetNetwork,
+            networkName: config.defaultNetwork,
+            networkConfig: config.networks[config.defaultNetwork],
             allowDevCeremony: Boolean(options.allowDevCeremony),
           });
 
